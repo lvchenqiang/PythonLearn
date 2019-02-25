@@ -251,7 +251,7 @@ class MainWindow:
         self.dev_btn_v = tkinter.IntVar()
 
         # define 0 flag dev 1 flag dis
-        self.buildtype = 0
+        self.buildtype = 1
 
         self.dev_btn = tkinter.Radiobutton(self.frame,text="dev",width=30,variable=self.dev_btn_v,value=0,command=self.selectBtnBuildType,bg="gray")
         self.dis_btn = tkinter.Radiobutton(self.frame, text="dis",width=30,variable=self.dev_btn_v,value=1,command=self.selectBtnBuildType,bg="gray")
@@ -378,7 +378,7 @@ class MainWindow:
                 archiveok = ipahelper.cerateIPA(self.buildtype,self.filepath,self.targetname,archivePath)
                 if archiveok == 0:
                     print ("archive success")
-                    if self.buildtype == 0:
+                    if self.buildtype == 1:
                         # ,archivePath,filename,tagdesc,mailusers):
                         print(str(self.taginfo_text.get(0.0,tkinter.END)))
                         print(str(self.mail_text.get(0.0,tkinter.END)))
