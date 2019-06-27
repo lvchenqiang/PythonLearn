@@ -31,8 +31,32 @@ MAIL_HOST = "smtp.mxhichina.com"
 # //邮件标题
 MAIL_SUBJECT = "测试版本已经发布"
 # //发件人MAIL_
-MAIL_FROM = "********"
-Mail_PassWord = "***********"
+MAIL_FROM = "**************"
+Mail_PassWord = "**********"
+
+
+# // 测试人员邮箱地址
+MAILS_TESTER = [
+                {"name":"许文杰",
+                 "mail":"xuwenjie@ellabook.cn"
+                 },
+               {
+                  'name':'吕陈强',
+                   'mail':'lvchenqiang@ellabook.cn'
+                },
+
+
+                # {
+                #   'name':'仇东航',
+                #   'mail':'qiudonghang@ellabook.cn'
+                # },
+]
+
+# // 用于存放多选按钮的值
+MAILS_TESTER_BTN_ARR = []
+
+# // 用于存放选择后的人员邮箱地址
+MAILS_TESTER_SELECTER = []
 
 
 class IPAHelper(object):
@@ -81,10 +105,10 @@ class IPAHelper(object):
         return ok
 
     def uploadToPGY(self,archivePath,filename,tagdesc,mailusers):
-        if len(str(mailusers)) == 0:
+        if len(mailusers) == 0:
             print("未选择 测试人员信息")
             return
-        print ("上传到蒲公英")
+        print ("开始上传到蒲公英")
         path = "%s/%s/%s.ipa" % (archivePath, filename, filename)
         f_op = open (path, 'rb')
 
@@ -168,13 +192,21 @@ class IPAHelper(object):
         #     return
         #  <a href="itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/74263d18d91273290c10fd0e32ff72bf>安装</a>
         # print(responseResult["appKey"])
-        msgInfo = "<html><body><table><tr><th>应用名称</th><th>%s</th></tr><tr><th>应用版本</th><th>%s</th></tr><tr><th>应用地址</th><th>https://www.pgyer.com/%s</th></tr><tr><th>应用更新时间</th><th>%s</th></tr></table><img src=%s width=\"150\" height=\"150\"></body></html>" % (
-            responseResult["appName"], str (responseResult["appVersion"]), str (responseResult["appShortcutUrl"]),
-            str (responseResult["appUpdated"]), str (responseResult["appQRCodeURL"]))
+        # msgInfo = "<html><body><table><tr><th>应用名称</th><th>%s</th></tr><tr><th>应用版本</th><th>%s</th></tr><tr><th>应用地址</th><th>https://www.pgyer.com/%s</th></tr><tr><th>应用更新时间</th><th>%s</th></tr></table><img src=%s width=\"150\" height=\"150\"></body></html>" % (
+        #     responseResult["appName"], str (responseResult["appVersion"]), str (responseResult["appShortcutUrl"]),
+        #     str (responseResult["appUpdated"]), str (responseResult["appQRCodeURL"]))
+        msgInfo = "<h>测试测试的</h>"
         msg = MIMEText (msgInfo, 'html', 'utf-8')
         msg["Subject"] = MAIL_SUBJECT
         msg['From'] = self._format_addr ('iOS开发 <%s>' % MAIL_FROM)
-        msg['To'] = self._format_addr (' <%s>' % mailusers)
+        mailusers_str = ''
+        for str in mailusers:
+            mailusers_str+=self._format_addr(str)
+            mailusers_str+=','
+
+        print(mailusers_str)
+        # msg['to'] = self._format_addr (' <%s>' % mailusers_str)
+        msg['to'] = mailusers_str
         try:
             # // 创建一个SMTP对象
             server = smtplib.SMTP ()
@@ -187,7 +219,7 @@ class IPAHelper(object):
             # // 登录邮箱
             # 校验用户，密码
             server.login (MAIL_FROM, Mail_PassWord)
-            receivers = str(mailusers).split(",")
+            receivers = mailusers
             print(receivers)
             # // 发送邮件
             server.sendmail (MAIL_FROM, receivers, msg.as_string ())
@@ -266,22 +298,46 @@ class MainWindow:
         self.taginfo_text.grid(row=2, column=1)
 
         #define mailto
-        self.mail_desc = tkinter.Label (self.frame, text="测试邮箱:(英文逗号分隔)", width=30)
-        self.mail_text = tkinter.Text (self.frame, width=40, height="1", bg='gray')
-        self.mail_desc.grid (row=3, column=0)
-        self.mail_text.grid (row=3, column=1)
+        self.mail_desc = tkinter.Label (self.frame, text="测试邮箱:(英文逗号分隔)", width=60)
+        self.mail_desc.grid (row=3, column=0,columnspan=2)
 
+
+
+        # define tester ui tester
+
+        i = 0
+        for tester in MAILS_TESTER:
+
+            variable = tkinter.IntVar()
+            testerBtn = tkinter.Checkbutton(self.frame,text=tester['name'], width=20,
+                                            variable = variable,
+                                            # onvalue='t',
+                                            # offvalue='f',
+                                            command=self.createTesterBtn)
+            testerBtn.grid(row=4 + int(i/2), column=i%2)
+            i += 1
+            MAILS_TESTER_BTN_ARR.append(variable)
+
+
+
+
+
+        last_row = 4+int(i/2)+1
         # define start build btn
         self.build_btn = tkinter.Button (self.frame, text="开始打包", width=60, height="1", bg='gray',
                                           command=self.startbuild)
 
-        self.build_btn.grid(row=4, column=0,columnspan=2)
+        self.build_btn.grid(row=last_row, column=0,columnspan=2)
 
         # define stop build btn
         self.cancle_build_btn = tkinter.Button (self.frame, text="结束打包", width=60, height="1", bg='gray',
                                          command=self.stopbuild)
 
-        self.cancle_build_btn.grid (row=5, column=0, columnspan=2)
+        self.cancle_build_btn.grid (row=last_row+1, column=0, columnspan=2)
+
+
+
+
 
 
 
@@ -289,6 +345,24 @@ class MainWindow:
 
         self.frame.mainloop ()
 
+    def createTesterBtn(self):
+        for i in range(0, len(MAILS_TESTER_BTN_ARR)):
+            btn_var = MAILS_TESTER_BTN_ARR[i]
+
+            if(btn_var.get() == 1):
+                if(MAILS_TESTER[i]["mail"] in MAILS_TESTER_SELECTER):
+                    print(MAILS_TESTER[i]["mail"] + "数组中已存在")
+                else:
+                    MAILS_TESTER_SELECTER.append(MAILS_TESTER[i]["mail"])
+            else:
+                if (MAILS_TESTER[i]["mail"] in MAILS_TESTER_SELECTER):
+                    MAILS_TESTER_SELECTER.remove(MAILS_TESTER[i]["mail"])
+
+
+
+
+
+        print(MAILS_TESTER_SELECTER)
 
     def askopenfilename(self):
         """
@@ -328,14 +402,19 @@ class MainWindow:
         print(self.taginfo_text.get(0.0,tkinter.END))
 
     def stopbuild(self):
-        print("停止 播放")
+        print("停止")
         os.system("exit()")
 
 
     def startbuild(self):
         print("开始打包");
+
+        ipahelper = IPAHelper()
+        ipahelper.sendMail('qeqweqwe',MAILS_TESTER_SELECTER)
+
+        return ;
         # self.filepath = os.getcwd()
-        ipahelper = IPAHelper ()
+
 
         # ipahelper.sendMail({"appName": "HD",
         #                 "appVersion": "appVersion",
@@ -380,9 +459,7 @@ class MainWindow:
                     print ("archive success")
                     if self.buildtype == 1:
                         # ,archivePath,filename,tagdesc,mailusers):
-                        print(str(self.taginfo_text.get(0.0,tkinter.END)))
-                        print(str(self.mail_text.get(0.0,tkinter.END)))
-                        uploadok = ipahelper.uploadToPGY(archivePath, self.targetname, str(self.taginfo_text.get(0.0,tkinter.END)),str(self.mail_text.get(0.0,tkinter.END)))
+                        uploadok = ipahelper.uploadToPGY(archivePath, self.targetname, str(self.taginfo_text.get(0.0,tkinter.END)),MAILS_TESTER_SELECTER)
                         if uploadok == 0:
                             print("上传成功")
                             self.build_btn.config (state=tkinter.ACTIVE, text="上传成功")
