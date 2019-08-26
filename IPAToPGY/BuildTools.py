@@ -44,12 +44,14 @@ MAILS_TESTER = [
                   'name':'吕陈强',
                    'mail':'lvchenqiang@ellabook.cn'
                 },
-
-
-                # {
-                #   'name':'仇东航',
-                #   'mail':'qiudonghang@ellabook.cn'
-                # },
+                {
+                  'name':'仇东航',
+                  'mail':'qiudonghang@ellabook.cn'
+                },
+                {
+                  'name':'姚明振',
+                  'mail':'yaomingzhen@ellabook.cn'
+                },
 ]
 
 # // 用于存放多选按钮的值
@@ -298,7 +300,7 @@ class MainWindow:
         self.taginfo_text.grid(row=2, column=1)
 
         #define mailto
-        self.mail_desc = tkinter.Label (self.frame, text="测试邮箱:(英文逗号分隔)", width=60)
+        self.mail_desc = tkinter.Label (self.frame, text="测试人员邮箱(可多选)", width=60)
         self.mail_desc.grid (row=3, column=0,columnspan=2)
 
 
@@ -410,12 +412,8 @@ class MainWindow:
         print("开始打包");
 
         ipahelper = IPAHelper()
-        ipahelper.sendMail('qeqweqwe',MAILS_TESTER_SELECTER)
 
-        return ;
         # self.filepath = os.getcwd()
-
-
         # ipahelper.sendMail({"appName": "HD",
         #                 "appVersion": "appVersion",
         #                 "appShortcutUrl": "暂无",
